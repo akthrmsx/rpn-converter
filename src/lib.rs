@@ -35,6 +35,7 @@ impl TryFrom<Token> for char {
             Token::Mul => Ok('*'),
             Token::Div => Ok('/'),
             Token::Ident(c) => Ok(c),
+            Token::Open => Err("close paren is not found".into()),
             _ => Err("invalid token is found".into()),
         }
     }
@@ -123,7 +124,7 @@ mod tests {
 
         assert_eq!(
             convert("(a + b".into()),
-            Err("invalid token is found".into())
+            Err("close paren is not found".into())
         );
 
         assert_eq!(
