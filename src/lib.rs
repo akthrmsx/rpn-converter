@@ -7,20 +7,21 @@ enum Token {
     Open,
     Close,
     Ident(char),
-    Invalid(char),
 }
 
-impl From<char> for Token {
-    fn from(c: char) -> Self {
+impl TryFrom<char> for Token {
+    type Error = String;
+
+    fn try_from(c: char) -> Result<Self, Self::Error> {
         match c {
-            '+' => Self::Add,
-            '-' => Self::Sub,
-            '*' => Self::Mul,
-            '/' => Self::Div,
-            '(' => Self::Open,
-            ')' => Self::Close,
-            c if c.is_ascii_alphabetic() => Self::Ident(c),
-            c => Self::Invalid(c),
+            '+' => Ok(Token::Add),
+            '-' => Ok(Token::Sub),
+            '*' => Ok(Token::Mul),
+            '/' => Ok(Token::Div),
+            '(' => Ok(Token::Open),
+            ')' => Ok(Token::Close),
+            c if c.is_ascii_alphabetic() => Ok(Token::Ident(c)),
+            c => Err(format!("invalid char is found: {}", c)),
         }
     }
 }
@@ -36,7 +37,7 @@ impl TryFrom<Token> for char {
             Token::Div => Ok('/'),
             Token::Ident(c) => Ok(c),
             Token::Open => Err("close paren is not found".into()),
-            _ => Err("invalid token is found".into()),
+            Token::Close => Err("invalid token is found".into()),
         }
     }
 }
@@ -60,7 +61,7 @@ pub fn convert(source: String) -> Result<String, String> {
             continue;
         }
 
-        match Token::from(c) {
+        match Token::try_from(c)? {
             Token::Open => stack.push(Token::Open),
             Token::Close => loop {
                 match stack.pop() {
@@ -70,7 +71,6 @@ pub fn convert(source: String) -> Result<String, String> {
                 }
             },
             Token::Ident(c) => tokens.push(c),
-            Token::Invalid(c) => return Err(format!("invalid char is found: {}", c)),
             current => {
                 while let Some(top) = stack.pop() {
                     if current.precedence() <= top.precedence() {
@@ -85,10 +85,8 @@ pub fn convert(source: String) -> Result<String, String> {
         }
     }
 
-    if !stack.is_empty() {
-        for token in stack.iter().rev() {
-            tokens.push(token.clone().try_into()?);
-        }
+    for token in stack.iter().rev() {
+        tokens.push(token.clone().try_into()?);
     }
 
     Ok(tokens
