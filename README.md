@@ -1,6 +1,18 @@
-# 中置記法 -> 後置記法
+# RPN converter
 
-## 例
+This is a converter that converts infix notation to reverse polish notation (RPN).
+
+## Supported characters
+
+* `[a-zA-Z]`
+* `+`
+* `-`
+* `*`
+* `/`
+* `(`
+* `)`
+
+## Examples
 
 ```sh
 $ cargo run
@@ -11,13 +23,3 @@ a b + c d e - / *
 >> a @ b
 invalid char is found: @
 ```
-
-## 使用可能文字
-
-* 半角英字（`a-zA-Z`）
-* `+`
-* `-`
-* `*`
-* `/`
-* `(`
-* `)`
